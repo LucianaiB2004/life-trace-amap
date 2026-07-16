@@ -35,6 +35,13 @@ test('builds the Liu Bei dynamic HTML from verified events', () => {
     assert.match(html, /new AMap\.Marker/);
     assert.match(html, /new AMap\.Polyline/);
     assert.match(html, /new AMap\.InfoWindow/);
+    assert.match(html, /data-map-theme="light"/);
+    assert.match(html, />暗色<\/button>/);
+    assert.match(html, />白色<\/button>/);
+    assert.match(html, /map\.setMapStyle/);
+    assert.match(html, /amap:\/\/styles\/normal/);
+    assert.match(html, /amap:\/\/styles\/darkblue/);
+    assert.match(html, /localStorage\.setItem\('life-trace-map-theme'/);
     assert.ok(
       html.indexOf("map.on('complete'") < html.indexOf('new AMap.Marker'),
       '应在创建标记前监听地图加载完成事件',
