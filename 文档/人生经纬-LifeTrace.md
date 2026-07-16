@@ -2,7 +2,7 @@
 
 日期：2026-07-16
 
-状态：已完成方案确认，等待书面规格复核
+状态：规格已确认，进入实施
 目标平台：Codex/OpenClaw Skill、ClawHub、GitHub
 
 ## 1. 产品定义
@@ -257,3 +257,77 @@ life-trace/
 - 只实现本规格列出的能力，不增加账号、数据库或在线编辑器。
 - 史料准确性优先于路线密度。
 - 高德在线能力和视觉模板分别验证，任何降级都必须显式说明。
+
+## 14. 精简实施清单
+
+> 展示名称使用“人生经纬 · LifeTrace”；发布目录使用符合 Skill 规范的 `life-trace`。
+
+### 任务一：安装并核验高德工具
+
+- [ ] 安装官方 `amap-cli-skill`。
+- [ ] 全局安装 `@amap-lbs/amap-gui`。
+- [ ] 验证 CLI 帮助、版本、环境变量和用户提供的 Key 类型。
+- [ ] 不把 Key 或安全密钥写入仓库文件。
+
+验收命令：
+
+```powershell
+amap-gui --help
+amap-gui status
+```
+
+### 任务二：先建立失败测试
+
+- [ ] 在没有新 Skill 的情况下执行代表性请求，记录来源遗漏、私人资料边界或历史路线误用等基线问题。
+- [ ] 创建数据校验、CSV 导入、HTML 生成和密钥扫描测试。
+- [ ] 运行测试并确认因功能尚未实现而失败。
+
+验收命令：
+
+```powershell
+node --test life-trace\test.mjs
+```
+
+### 任务三：实现最小 Skill
+
+只创建必要文件：
+
+```text
+life-trace/
+├── SKILL.md
+├── agents/openai.yaml
+├── life-trace.mjs
+├── liu-bei.json
+├── personal-template.csv
+├── demo.html
+├── test.mjs
+└── .gitignore
+```
+
+- [ ] 用官方初始化器创建合规 Skill 骨架。
+- [ ] 在 `SKILL.md` 中写入名称、使用场景、功能、教程、公开人物与私人上传流程。
+- [ ] `life-trace.mjs` 同时承担数据校验、CSV 读取和 HTML 生成，避免拆出重复脚本。
+- [ ] `liu-bei.json` 保存有来源、置信度和高德坐标的 demo 数据。
+- [ ] `demo.html` 实现全国迁徙路线、动态播放、节点与侧栏联动。
+
+生成命令：
+
+```powershell
+node life-trace\life-trace.mjs build life-trace\liu-bei.json life-trace\demo.html
+```
+
+### 任务四：验证与发布准备
+
+- [ ] 运行全部自动测试与 Skill 快速校验。
+- [ ] 在浏览器中检查桌面、窄屏、动态路线、节点和侧栏。
+- [ ] 使用高德 CLI 或 API 完成一次真实地点能力验证。
+- [ ] 扫描仓库，确认不存在明文 Key、临时文件和私人信息。
+- [ ] 提交可直接推送至 GitHub、可打包至 ClawHub 的目录。
+
+验收命令：
+
+```powershell
+node --test life-trace\test.mjs
+python C:\Users\lucianaib\.codex\skills\.system\skill-creator\scripts\quick_validate.py life-trace
+git status --short
+```
