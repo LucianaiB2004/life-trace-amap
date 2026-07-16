@@ -1,0 +1,4 @@
+interface:
+  display_name: "人生经纬 · LifeTrace"
+  short_description: "把人物经历转成有来源、可核验、可播放的动态人生足迹地图"
+  default_prompt: "使用 $life-trace 为刘备生成一张带来源与可信度的动态人生足迹地图。"
