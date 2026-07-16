@@ -42,6 +42,11 @@ test('builds the Liu Bei dynamic HTML from verified events', () => {
     assert.match(html, /amap:\/\/styles\/normal/);
     assert.match(html, /amap:\/\/styles\/darkblue/);
     assert.match(html, /localStorage\.setItem\('life-trace-map-theme'/);
+    assert.match(html, /class="story-hook/);
+    assert.match(html, /item\.storyTag/);
+    assert.match(html, /shell\.dataset\.theme=theme/);
+    assert.match(html, /\.shell\[data-theme="light"\] aside/);
+    assert.match(html, /\.amap-info-content\{[^}]*white-space:normal/);
     assert.ok(
       html.indexOf("map.on('complete'") < html.indexOf('new AMap.Marker'),
       '应在创建标记前监听地图加载完成事件',
@@ -51,6 +56,17 @@ test('builds the Liu Bei dynamic HTML from verified events', () => {
   } finally {
     rmSync(work, { recursive: true, force: true });
   }
+});
+
+test('Liu Bei demo has rich sourced stories with optional typed hooks', () => {
+  const data = JSON.parse(readFileSync(join(root, 'liu-bei.json'), 'utf8'));
+  const tagged = data.events.filter((event) => event.storyTag);
+  assert.equal(data.events.length, 15);
+  assert.ok(data.events.every((event) => event.description.length >= 70), '每个地点故事应至少有 70 个字符');
+  assert.ok(tagged.length >= 8, '至少 8 个事件应有第一印象标签');
+  assert.ok(tagged.every((event) => ['正史有载', '文学典故', '后世概括'].includes(event.storyTagType)));
+  assert.ok(tagged.some((event) => event.storyTag === '桃园结义' && event.storyTagType === '文学典故'));
+  assert.ok(tagged.some((event) => event.storyTag === '白帝托孤' && event.storyTagType === '正史有载'));
 });
 
 test('serve refuses to start without a Web JS key', () => {
