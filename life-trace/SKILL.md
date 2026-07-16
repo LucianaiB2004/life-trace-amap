@@ -19,7 +19,7 @@ description: Use when creating a sourced lifetime footprint map for a historical
 2. 建立事件表：记录时间、地点、事件、来源和可信度。
 3. 核对地点：优先使用用户坐标；否则经用户允许后调用高德地理编码。不得用模型记忆伪造坐标。
 4. 区分路线：历史人物使用地点关系线；现代导航路线只表示今天的道路，不得称为历史人物真实行程。
-5. 运行校验并生成 HTML；打开页面检查动态播放、节点和侧栏联动。
+5. 运行校验并生成 HTML；使用 `serve` 从环境变量加载真实高德地图，检查动态播放、标记和侧栏联动。
 
 ## 公开人物
 
@@ -63,9 +63,19 @@ node life-trace.mjs geocode "四川省成都市"
 
 Key 只从环境变量读取，不写入 Skill、数据或 HTML。
 
+启动真实高德地图 Demo：
+
+```powershell
+$env:AMAP_KEY="你的高德 Web JS API Key"
+$env:AMAP_SECURITY_KEY="对应的安全密钥（旧版 Key 可留空）"
+node life-trace.mjs serve demo.html
+```
+
+不要直接双击 `demo.html`：页面需要由 `serve` 在内存中注入高德配置。凭据错误时必须显示错误，不得用案例轮廓图冒充高德在线地图。
+
 ## Demo 演示
 
-运行 `node life-trace.mjs build liu-bei.json demo.html`，然后打开 `demo.html`：
+先运行 `node life-trace.mjs build liu-bei.json demo.html`，再运行 `node life-trace.mjs serve demo.html` 并打开输出地址：
 
 1. 点击“播放足迹”，路线按年代逐段点亮。
 2. 点击地图节点，右侧跳转到对应地点故事。
@@ -76,4 +86,4 @@ Key 只从环境变量读取，不写入 Skill、数据或 HTML。
 
 - 保留人物标题、事件时间轴、来源、可信度和数据质量提示。
 - 对无法定位的事件报错或排除出路线，不静默补造坐标。
-- 最终 HTML 不包含 `AMAP_KEY` 或 `AMAP_SECURITY_KEY`。
+- 最终 HTML 不包含 `AMAP_KEY` 或 `AMAP_SECURITY_KEY`，由本机 `serve` 运行时注入。

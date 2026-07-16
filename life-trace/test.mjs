@@ -13,7 +13,7 @@ function run(...args) {
   return spawnSync(process.execPath, [cli, ...args], {
     cwd: root,
     encoding: 'utf8',
-    env: { ...process.env, AMAP_KEY: '' },
+    env: { ...process.env, AMAP_KEY: '', AMAP_WEB_KEY: '', AMAP_SECURITY_KEY: '' },
   });
 }
 
@@ -30,10 +30,26 @@ test('builds the Liu Bei dynamic HTML from verified events', () => {
     assert.match(html, /播放足迹/);
     assert.match(html, /可信度/);
     assert.match(html, /史料来源/);
+    assert.match(html, /id="amapMap"/);
+    assert.match(html, /new AMap\.Map/);
+    assert.match(html, /new AMap\.Marker/);
+    assert.match(html, /new AMap\.Polyline/);
+    assert.match(html, /new AMap\.InfoWindow/);
+    assert.ok(
+      html.indexOf("map.on('complete'") < html.indexOf('new AMap.Marker'),
+      '应在创建标记前监听地图加载完成事件',
+    );
+    assert.doesNotMatch(html, /id="mapSvg"|china-shape/);
     assert.doesNotMatch(html, /AMAP_(?:WEB_)?KEY\s*[:=]\s*["'][a-f0-9]{20,}/i);
   } finally {
     rmSync(work, { recursive: true, force: true });
   }
+});
+
+test('serve refuses to start without a Web JS key', () => {
+  const result = run('serve', join(root, 'demo.html'));
+  assert.equal(result.status, 1);
+  assert.match(result.stderr, /AMAP_KEY.*Web JS/i);
 });
 
 test('rejects an event without a source instead of inventing certainty', () => {
@@ -85,4 +101,5 @@ test('skill instructions define public research and private upload boundaries', 
   assert.match(skill, /现代导航路线.*历史/);
   assert.match(skill, /使用教程/);
   assert.match(skill, /demo/i);
+  assert.match(skill, /life-trace\.mjs serve/);
 });
