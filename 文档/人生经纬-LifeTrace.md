@@ -344,3 +344,14 @@ node --test life-trace\test.mjs
 python C:\Users\lucianaib\.codex\skills\.system\skill-creator\scripts\quick_validate.py life-trace
 git status --short
 ```
+
+## 15. 地图明暗主题切换
+
+- 地图右上角提供“暗色 / 白色”双按钮，默认选中“白色”。
+- 白色使用高德标准浅色底图；暗色使用 `darkblue` 底图。
+- 切换只调用地图样式更新，不重建地图，必须保留当前播放进度、阶段筛选、活动节点和信息窗。
+- 地图区域的遮罩、连接状态和按钮视觉随主题同步变化，保证文字与控件清晰。
+- 主题选择保存在当前浏览器；读取失败时仍以白色为默认值。
+- 桌面端和移动端按钮都位于地图右上角，不遮挡高德控件与播放按钮。
+
+验收标准：生成 HTML 包含两个主题按钮和白色默认状态；浏览器中切换后高德 `mapStyle` 正确变化，事件节点数量与当前年份保持不变。
