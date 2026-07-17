@@ -71,6 +71,7 @@ test('supports a public GitHub Pages preview with runtime AMap configuration', (
   assert.match(readme, /https:\/\/lucianaib2004\.github\.io\/life-trace-amap\//);
   assert.match(workflow, /actions\/deploy-pages@v4/);
   assert.match(workflow, /secrets\.AMAP_KEY/);
+  assert.match(workflow, /window\.__LIFETRACE_AMAP_CONFIG__/);
 });
 
 test('Liu Bei demo has rich sourced stories with optional typed hooks', () => {
