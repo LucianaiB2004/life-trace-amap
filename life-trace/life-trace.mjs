@@ -265,7 +265,7 @@ function renderHtml(data) {
       <div class="footnote">路线仅表达事件发生地点的时间关系。古代行政区与现代坐标并非一一对应；标为“现代位置推定”的节点只用于空间叙事。</div>
     </aside>
   </main>
-  <script src="./__lifetrace_amap_config__.js"></script>
+  <script src="./lifetrace-amap-config.js"></script>
   <script>
     const DATA=${embedded};
     const CONFIG=window.__LIFETRACE_AMAP_CONFIG__;
@@ -372,7 +372,7 @@ async function serveHtml(input, port) {
   }).replaceAll('<', '\\u003c');
   const server = createServer((request, response) => {
     const url = new URL(request.url || '/', 'http://127.0.0.1');
-    if (url.pathname === '/__lifetrace_amap_config__.js') {
+    if (url.pathname === '/lifetrace-amap-config.js') {
       response.writeHead(200, {
         'Content-Type': 'text/javascript; charset=utf-8',
         'Cache-Control': 'no-store, max-age=0',

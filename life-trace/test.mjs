@@ -67,7 +67,7 @@ test('supports a public GitHub Pages preview with runtime AMap configuration', (
   const readme = readFileSync(join(root, '..', 'README.md'), 'utf8');
   const workflow = readFileSync(join(root, '..', '.github', 'workflows', 'pages.yml'), 'utf8');
 
-  assert.match(html, /src="\.\/__lifetrace_amap_config__\.js"/);
+  assert.match(html, /src="\.\/lifetrace-amap-config\.js"/);
   assert.match(readme, /https:\/\/lucianaib2004\.github\.io\/life-trace-amap\//);
   assert.match(workflow, /actions\/deploy-pages@v4/);
   assert.match(workflow, /secrets\.AMAP_KEY/);
