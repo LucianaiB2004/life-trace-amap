@@ -2,7 +2,10 @@
 
 基于高德开放平台的人物一生足迹地图 Skill。它把人物经历整理为可追溯的“时间—地点—事件—来源—可信度”数据，在真实高德地图上播放动态路线，并用统一画廊展示人物形象与核心故事图。
 
-GitHub：<https://github.com/LucianaiB2004/life-trace-amap>
+发布地址：
+
+- GitHub：<https://github.com/LucianaiB2004/life-trace-amap>
+- ClawHub：<https://clawhub.ai/lucianaib2004/skills/life-trace>
 
 ## 功能
 
@@ -42,16 +45,6 @@ node life-trace.mjs serve demo.html
 ```powershell
 node --test test.mjs
 ```
-
-## ClawHub 发布
-
-先进行不上传的发布校验：
-
-```powershell
-clawhub skill publish ./life-trace --slug life-trace --name "人生经纬 · LifeTrace" --version 1.0.0 --changelog "Initial release" --dry-run
-```
-
-校验通过后登录 ClawHub，去掉 `--dry-run` 即可发布。ClawHub 发布内容采用 MIT-0 许可，详见本仓库 [`LICENSE`](LICENSE)。
 
 ## 隐私与安全
 

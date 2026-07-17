@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { spawn, spawnSync } from 'node:child_process';
@@ -58,6 +58,10 @@ test('builds the Liu Bei dynamic HTML from verified events', () => {
   }
 });
 
+test('keeps the self-contained demo below the ClawHub upload limit', () => {
+  assert.ok(statSync(join(root, 'demo.html')).size < 3 * 1024 * 1024, 'demo.html 应小于 3 MB');
+});
+
 test('Liu Bei demo has rich sourced stories with optional typed hooks', () => {
   const data = JSON.parse(readFileSync(join(root, 'liu-bei.json'), 'utf8'));
   const tagged = data.events.filter((event) => event.storyTag);
@@ -76,7 +80,9 @@ test('ships a transparent portrait, reusable prompt, and timeline portrait card'
   const html = readFileSync(join(root, 'demo.html'), 'utf8');
 
   assert.deepEqual([...portrait.subarray(1, 4)], [0x50, 0x4e, 0x47], '人物像应为 PNG');
-  assert.ok([4, 6].includes(portrait[25]), '人物像 PNG 必须具有透明通道');
+  const colorType = portrait[25];
+  const hasPaletteTransparency = colorType === 3 && portrait.includes(Buffer.from('tRNS'));
+  assert.ok([4, 6].includes(colorType) || hasPaletteTransparency, '人物像 PNG 必须具有透明通道');
   assert.match(prompt, /\{\{人物姓名\}\}/);
   assert.match(prompt, /透明背景/);
   assert.match(prompt, /不要白色棋盘格背景/);
