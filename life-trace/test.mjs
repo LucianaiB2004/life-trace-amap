@@ -108,9 +108,13 @@ test('builds one museum gallery containing the portrait and core story slides', 
   assert.match(html, /id="galleryCounter"/);
   assert.match(html, /function showGallerySlide/);
   assert.match(html, /function syncGalleryFromEvent/);
-  assert.match(html, /\.gallery-slide\{[^}]*aspect-ratio:1\/1/);
+  assert.match(html, /\.gallery-slide\{[^}]*aspect-ratio:4\/3/);
   assert.match(html, /\.gallery-slide>figure\{[^}]*width:100%;[^}]*height:100%/);
   assert.match(html, /\.story-slide img\{[^}]*width:100%;[^}]*height:100%;[^}]*object-fit:contain/);
+  assert.match(html, /gallerySlides\[0\]\.cloneNode\(true\)/);
+  assert.match(html, /gallerySlides\[gallerySlides\.length-1\]\.cloneNode\(true\)/);
+  assert.match(html, /function normalizeGalleryLoop/);
+  assert.match(html, /portraitTrack\.append\(firstClone\)/);
   assert.doesNotMatch(html, /class="story-visual"/);
   assert.ok(
     html.indexOf('class="portrait-card"') < html.indexOf('class="story-slide"'),
