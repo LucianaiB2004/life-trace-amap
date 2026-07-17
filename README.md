@@ -38,7 +38,7 @@ $env:AMAP_SECURITY_KEY="对应的安全密钥（旧版 Key 可留空）"
 node life-trace.mjs serve demo.html
 ```
 
-唯一预览地址：<http://127.0.0.1:8777/demo.html>
+在线预览地址：<https://lucianaib2004.github.io/life-trace-amap/>
 
 运行测试：
 

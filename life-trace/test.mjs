@@ -62,6 +62,17 @@ test('keeps the self-contained demo below the ClawHub upload limit', () => {
   assert.ok(statSync(join(root, 'demo.html')).size < 3 * 1024 * 1024, 'demo.html 应小于 3 MB');
 });
 
+test('supports a public GitHub Pages preview with runtime AMap configuration', () => {
+  const html = readFileSync(join(root, 'demo.html'), 'utf8');
+  const readme = readFileSync(join(root, '..', 'README.md'), 'utf8');
+  const workflow = readFileSync(join(root, '..', '.github', 'workflows', 'pages.yml'), 'utf8');
+
+  assert.match(html, /src="\.\/__lifetrace_amap_config__\.js"/);
+  assert.match(readme, /https:\/\/lucianaib2004\.github\.io\/life-trace-amap\//);
+  assert.match(workflow, /actions\/deploy-pages@v4/);
+  assert.match(workflow, /secrets\.AMAP_KEY/);
+});
+
 test('Liu Bei demo has rich sourced stories with optional typed hooks', () => {
   const data = JSON.parse(readFileSync(join(root, 'liu-bei.json'), 'utf8'));
   const tagged = data.events.filter((event) => event.storyTag);

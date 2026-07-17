@@ -265,7 +265,7 @@ function renderHtml(data) {
       <div class="footnote">路线仅表达事件发生地点的时间关系。古代行政区与现代坐标并非一一对应；标为“现代位置推定”的节点只用于空间叙事。</div>
     </aside>
   </main>
-  <script src="/__lifetrace_amap_config__.js"></script>
+  <script src="./__lifetrace_amap_config__.js"></script>
   <script>
     const DATA=${embedded};
     const CONFIG=window.__LIFETRACE_AMAP_CONFIG__;
