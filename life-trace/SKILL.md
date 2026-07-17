@@ -1,6 +1,25 @@
 ---
 name: life-trace
 description: Use when creating a sourced lifetime footprint map for a historical figure, public figure, family member, or private person from public research, JSON, or CSV data, especially when the result should be an interactive HTML timeline using AMap geocoding or map links.
+version: 1.0.2
+metadata:
+  openclaw:
+    requires:
+      env:
+        - AMAP_KEY
+      bins:
+        - node
+    primaryEnv: AMAP_KEY
+    envVars:
+      - name: AMAP_KEY
+        required: true
+        description: 高德 Web JS API Key，用于本地真实地图预览。
+      - name: AMAP_WEB_KEY
+        required: false
+        description: AMAP_KEY 的兼容别名。
+      - name: AMAP_SECURITY_KEY
+        required: false
+        description: 新版高德 Web JS API Key 可选配套的安全密钥。
 ---
 
 # 人生经纬 · LifeTrace

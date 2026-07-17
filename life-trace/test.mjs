@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { mkdtempSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdtempSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { spawn, spawnSync } from 'node:child_process';
@@ -190,6 +190,18 @@ test('ships one stable preview address and ClawHub runtime requirements', () => 
   assert.match(skill, /AMAP_KEY/);
   assert.match(skill, /同一人物与故事画廊/);
   assert.doesNotMatch(skill, /独立故事图模块/);
+});
+
+test('declares ClawHub runtime metadata and excludes repository-only tests', () => {
+  const skill = readFileSync(join(root, 'SKILL.md'), 'utf8');
+  assert.ok(existsSync(join(root, '.clawhubignore')), '.clawhubignore 应存在');
+  const ignore = readFileSync(join(root, '.clawhubignore'), 'utf8');
+
+  assert.match(skill, /metadata:\s*\n\s+openclaw:/);
+  assert.match(skill, /requires:\s*\n\s+env:\s*\n\s+- AMAP_KEY/);
+  assert.match(skill, /primaryEnv:\s*AMAP_KEY/);
+  assert.match(skill, /name:\s*AMAP_SECURITY_KEY[\s\S]*required:\s*false/);
+  assert.match(ignore, /^test\.mjs$/m);
 });
 
 test('serve refuses to start without a Web JS key', () => {
