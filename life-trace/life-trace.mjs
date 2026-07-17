@@ -84,6 +84,26 @@ function loadData(path, personName) {
   return JSON.parse(readFileSync(path, 'utf8').replace(/^\uFEFF/, ''));
 }
 
+function inlineLocalImages(data, assetDirectory) {
+  const copy = structuredClone(data);
+  const inline = (source) => {
+    if (!source || /^(?:data:|https?:\/\/)/i.test(source)) return source;
+    const path = resolve(assetDirectory, source.replace(/^[.][\\/]/, ''));
+    const extension = extname(path).toLowerCase();
+    const mime = extension === '.png'
+      ? 'image/png'
+      : ['.jpg', '.jpeg'].includes(extension) ? 'image/jpeg' : null;
+    if (!mime) return source;
+    return `data:${mime};base64,${readFileSync(path).toString('base64')}`;
+  };
+
+  if (copy.person?.portrait?.src) copy.person.portrait.src = inline(copy.person.portrait.src);
+  copy.events.forEach((event) => {
+    if (event.storyImage) event.storyImage = inline(event.storyImage);
+  });
+  return copy;
+}
+
 function validateData(data) {
   const errors = [];
   if (!data?.person?.name) errors.push('person.name 不能为空');
@@ -165,7 +185,12 @@ function renderPortraitGallery(person, events) {
 }
 
 function renderHtml(data) {
-  const embedded = JSON.stringify(data).replaceAll('<', '\\u003c');
+  const runtimeData = structuredClone(data);
+  if (runtimeData.person?.portrait) delete runtimeData.person.portrait.src;
+  runtimeData.events.forEach((event) => {
+    if (event.storyImage) event.storyImage = true;
+  });
+  const embedded = JSON.stringify(runtimeData).replaceAll('<', '\\u003c');
   const phases = [...new Set(data.events.map((event) => event.phase))];
   const locations = new Set(data.events.map((event) => event.coordinates.join(','))).size;
   const filters = ['全部阶段', ...phases].map((phase, index) => (
@@ -397,7 +422,7 @@ async function serveHtml(input, port) {
 async function main() {
   const [command, ...args] = process.argv.slice(2);
   if (!command || ['-h', '--help', 'help'].includes(command)) {
-    console.log('人生经纬 · LifeTrace\n\n用法：\n  node life-trace.mjs validate <data.json|data.csv>\n  node life-trace.mjs build <input> <output.html> [--person <name>]\n  node life-trace.mjs serve <demo.html> [--port 8766]\n  node life-trace.mjs geocode <address>');
+    console.log('人生经纬 · LifeTrace\n\n用法：\n  node life-trace.mjs validate <data.json|data.csv>\n  node life-trace.mjs build <input> <output.html> [--person <name>]\n  node life-trace.mjs serve <demo.html> [--port 8777]\n  node life-trace.mjs geocode <address>');
     return;
   }
   if (command === 'geocode') {
@@ -408,7 +433,7 @@ async function main() {
   if (command === 'serve') {
     if (!args[0]) throw new Error('serve 需要 HTML 文件。');
     const portIndex = args.indexOf('--port');
-    const port = portIndex >= 0 ? Number(args[portIndex + 1]) : 8766;
+    const port = portIndex >= 0 ? Number(args[portIndex + 1]) : 8777;
     if (!Number.isInteger(port) || port < 0 || port > 65535) throw new Error('serve --port 必须是 0 到 65535 的整数。');
     await serveHtml(resolve(args[0]), port);
     return;
@@ -428,7 +453,8 @@ async function main() {
     if (!output || output.startsWith('--')) throw new Error('build 需要输出 HTML 路径。');
     const target = resolve(output);
     mkdirSync(dirname(target), { recursive: true });
-    writeFileSync(target, renderHtml(data), 'utf8');
+    const prepared = inlineLocalImages(data, dirname(resolve(input)));
+    writeFileSync(target, renderHtml(prepared), 'utf8');
     console.log('已生成：' + target);
     return;
   }

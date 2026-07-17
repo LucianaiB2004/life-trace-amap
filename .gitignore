@@ -1,0 +1,6 @@
+.env
+*.local.html
+private-*.csv
+private-*.json
+.clawhub/
+.clawdhub/

@@ -82,7 +82,7 @@ test('ships a transparent portrait, reusable prompt, and timeline portrait card'
   assert.match(prompt, /不要白色棋盘格背景/);
   assert.match(skill, /portrait-prompt\.md/);
   assert.match(html, /class="portrait-card"/);
-  assert.match(html, /src="\.\/liu-bei-portrait\.png"/);
+  assert.match(html, /src="data:image\/png;base64,/);
   assert.match(html, /alt="刘备人物剪纸拼贴像"/);
   assert.match(html, /\.portrait-card img\{[^}]*width:auto;[^}]*max-width:100%/);
   assert.ok(
@@ -141,22 +141,37 @@ test('playback can reset from any active event to the beginning', () => {
 
 test('ships a reusable core-story prompt and generated story assets', () => {
   const prompt = readFileSync(join(root, 'story-prompt.md'), 'utf8');
+  const html = readFileSync(join(root, 'demo.html'), 'utf8');
   assert.match(prompt, /\{\{故事名称\}\}/);
   assert.match(prompt, /剪纸拼贴/);
   assert.match(prompt, /4:3/);
   assert.match(prompt, /不要白色棋盘格背景/);
 
   for (const filename of [
-    'story-taoyuan.png',
-    'story-qingmei.png',
-    'story-sangu.png',
-    'story-changban.png',
-    'story-yizhou.png',
-    'story-baidi.png',
+    'story-taoyuan.jpg',
+    'story-qingmei.jpg',
+    'story-sangu.jpg',
+    'story-changban.jpg',
+    'story-yizhou.jpg',
+    'story-baidi.jpg',
   ]) {
     const image = readFileSync(join(root, filename));
-    assert.deepEqual([...image.subarray(1, 4)], [0x50, 0x4e, 0x47], filename + ' 应为 PNG');
+    assert.deepEqual([...image.subarray(0, 3)], [0xff, 0xd8, 0xff], filename + ' 应为 JPEG');
   }
+  assert.match(html, /src="data:image\/jpeg;base64,/);
+});
+
+test('ships one stable preview address and ClawHub runtime requirements', () => {
+  const source = readFileSync(cli, 'utf8');
+  const skill = readFileSync(join(root, 'SKILL.md'), 'utf8');
+
+  assert.match(source, /serve <demo\.html> \[--port 8777\]/);
+  assert.match(source, /: 8777;/);
+  assert.match(skill, /## 运行要求/);
+  assert.match(skill, /Node\.js 18/);
+  assert.match(skill, /AMAP_KEY/);
+  assert.match(skill, /同一人物与故事画廊/);
+  assert.doesNotMatch(skill, /独立故事图模块/);
 });
 
 test('serve refuses to start without a Web JS key', () => {
