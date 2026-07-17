@@ -91,20 +91,28 @@ test('ships a transparent portrait, reusable prompt, and timeline portrait card'
   );
 });
 
-test('builds a museum-style map stage with independent portrait and story galleries', () => {
+test('builds one museum gallery containing the portrait and core story slides', () => {
   const html = readFileSync(join(root, 'demo.html'), 'utf8');
   const data = JSON.parse(readFileSync(join(root, 'liu-bei.json'), 'utf8'));
   const skill = readFileSync(join(root, 'SKILL.md'), 'utf8');
 
-  assert.match(html, /class="person-plaque"/);
+  assert.doesNotMatch(html, /class="person-plaque"/);
+  assert.match(html, /<header>\s*<div><div class="eyebrow">/);
   assert.match(html, /class="portrait-gallery"/);
   assert.match(html, /class="portrait-track"/);
-  assert.match(html, /aria-label="上一张人物图"/);
-  assert.match(html, /aria-label="下一张人物图"/);
-  assert.match(html, /class="story-visual"/);
-  assert.match(html, /id="storyVisualImage"/);
-  assert.match(html, /id="storyVisualTitle"/);
-  assert.match(html, /function updateStoryVisual/);
+  assert.match(html, /aria-label="上一张画面"/);
+  assert.match(html, /aria-label="下一张画面"/);
+  assert.match(html, /class="story-slide"/);
+  assert.match(html, /data-story-event-id="xuchang-198"/);
+  assert.match(html, /id="galleryTitle"/);
+  assert.match(html, /id="galleryCounter"/);
+  assert.match(html, /function showGallerySlide/);
+  assert.match(html, /function syncGalleryFromEvent/);
+  assert.doesNotMatch(html, /class="story-visual"/);
+  assert.ok(
+    html.indexOf('class="portrait-card"') < html.indexOf('class="story-slide"'),
+    '人物卡应是统一画廊第一张，故事图紧随其后',
+  );
   assert.match(skill, /story-prompt\.md/);
   assert.ok(data.events.filter((event) => event.storyImage).length >= 5, '至少五个核心事件应配有故事图');
   assert.ok(data.events.filter((event) => event.storyImage).length < data.events.length, '故事图与时间线应是独立模块，不要求逐项配图');
