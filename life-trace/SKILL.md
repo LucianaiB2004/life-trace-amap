@@ -19,7 +19,8 @@ description: Use when creating a sourced lifetime footprint map for a historical
 2. 建立事件表：记录时间、地点、事件、来源和可信度。
 3. 核对地点：优先使用用户坐标；否则经用户允许后调用高德地理编码。不得用模型记忆伪造坐标。
 4. 区分路线：历史人物使用地点关系线；现代导航路线只表示今天的道路，不得称为历史人物真实行程。
-5. 运行校验并生成 HTML；使用 `serve` 从环境变量加载真实高德地图，检查动态播放、标记和侧栏联动。
+5. 按需生成人物像：读取 [portrait-prompt.md](portrait-prompt.md)，填充已核对的人物变量并生成 1:1 透明 PNG；逐字核对中文并确认透明通道，以 `<person-slug>-portrait.png` 保存。用户已提供授权图片时优先使用该图片，不重复生成。
+6. 运行校验并生成 HTML；使用 `serve` 从环境变量加载真实高德地图，检查动态播放、标记和侧栏联动。
 
 ## 公开人物
 
@@ -85,5 +86,6 @@ node life-trace.mjs serve demo.html
 ## 输出要求
 
 - 保留人物标题、事件时间轴、来源、可信度和数据质量提示。
+- 若包含人物像，将透明 PNG 与 HTML 放在同一目录，并在右侧时间线顶部展示。
 - 对无法定位的事件报错或排除出路线，不静默补造坐标。
 - 最终 HTML 不包含 `AMAP_KEY` 或 `AMAP_SECURITY_KEY`，由本机 `serve` 运行时注入。

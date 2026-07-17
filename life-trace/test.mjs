@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { spawnSync } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
 import test from 'node:test';
 import { fileURLToPath } from 'node:url';
 
@@ -69,10 +69,65 @@ test('Liu Bei demo has rich sourced stories with optional typed hooks', () => {
   assert.ok(tagged.some((event) => event.storyTag === '白帝托孤' && event.storyTagType === '正史有载'));
 });
 
+test('ships a transparent portrait, reusable prompt, and timeline portrait card', () => {
+  const portrait = readFileSync(join(root, 'liu-bei-portrait.png'));
+  const prompt = readFileSync(join(root, 'portrait-prompt.md'), 'utf8');
+  const skill = readFileSync(join(root, 'SKILL.md'), 'utf8');
+  const html = readFileSync(join(root, 'demo.html'), 'utf8');
+
+  assert.deepEqual([...portrait.subarray(1, 4)], [0x50, 0x4e, 0x47], '人物像应为 PNG');
+  assert.ok([4, 6].includes(portrait[25]), '人物像 PNG 必须具有透明通道');
+  assert.match(prompt, /\{\{人物姓名\}\}/);
+  assert.match(prompt, /透明背景/);
+  assert.match(prompt, /不要白色棋盘格背景/);
+  assert.match(skill, /portrait-prompt\.md/);
+  assert.match(html, /class="portrait-card"/);
+  assert.match(html, /src="\.\/liu-bei-portrait\.png"/);
+  assert.match(html, /alt="刘备人物剪纸拼贴像"/);
+  assert.match(html, /\.portrait-card img\{[^}]*width:auto;[^}]*max-width:100%/);
+  assert.ok(
+    html.indexOf('class="portrait-card"') < html.indexOf('class="timeline-card'),
+    '人物像应位于第一张时间线事件卡之前',
+  );
+});
+
 test('serve refuses to start without a Web JS key', () => {
   const result = run('serve', join(root, 'demo.html'));
   assert.equal(result.status, 1);
   assert.match(result.stderr, /AMAP_KEY.*Web JS/i);
+});
+
+test('serve exposes the portrait asset beside the generated HTML', async (context) => {
+  const child = spawn(process.execPath, [cli, 'serve', join(root, 'demo.html'), '--port', '0'], {
+    cwd: root,
+    env: { ...process.env, AMAP_KEY: 'test-web-js-key', AMAP_WEB_KEY: '', AMAP_SECURITY_KEY: '' },
+    stdio: ['ignore', 'pipe', 'pipe'],
+  });
+  context.after(() => child.kill());
+
+  const baseUrl = await new Promise((resolveUrl, rejectUrl) => {
+    let output = '';
+    const timeout = setTimeout(() => rejectUrl(new Error('预览服务启动超时：' + output)), 5000);
+    child.stdout.on('data', (chunk) => {
+      output += chunk;
+      const match = output.match(/http:\/\/127\.0\.0\.1:(\d+)/);
+      if (!match) return;
+      clearTimeout(timeout);
+      resolveUrl('http://127.0.0.1:' + match[1]);
+    });
+    child.once('exit', (code) => {
+      clearTimeout(timeout);
+      rejectUrl(new Error('预览服务提前退出，代码 ' + code + '：' + output));
+    });
+  });
+
+  const response = await fetch(baseUrl + '/liu-bei-portrait.png', {
+    signal: AbortSignal.timeout(5000),
+  });
+  assert.equal(response.status, 200);
+  assert.match(response.headers.get('content-type') || '', /^image\/png/);
+  const bytes = new Uint8Array(await response.arrayBuffer());
+  assert.deepEqual([...bytes.subarray(1, 4)], [0x50, 0x4e, 0x47]);
 });
 
 test('rejects an event without a source instead of inventing certainty', () => {
