@@ -91,6 +91,59 @@ test('ships a transparent portrait, reusable prompt, and timeline portrait card'
   );
 });
 
+test('builds a museum-style map stage with independent portrait and story galleries', () => {
+  const html = readFileSync(join(root, 'demo.html'), 'utf8');
+  const data = JSON.parse(readFileSync(join(root, 'liu-bei.json'), 'utf8'));
+  const skill = readFileSync(join(root, 'SKILL.md'), 'utf8');
+
+  assert.match(html, /class="person-plaque"/);
+  assert.match(html, /class="portrait-gallery"/);
+  assert.match(html, /class="portrait-track"/);
+  assert.match(html, /aria-label="上一张人物图"/);
+  assert.match(html, /aria-label="下一张人物图"/);
+  assert.match(html, /class="story-visual"/);
+  assert.match(html, /id="storyVisualImage"/);
+  assert.match(html, /id="storyVisualTitle"/);
+  assert.match(html, /function updateStoryVisual/);
+  assert.match(skill, /story-prompt\.md/);
+  assert.ok(data.events.filter((event) => event.storyImage).length >= 5, '至少五个核心事件应配有故事图');
+  assert.ok(data.events.filter((event) => event.storyImage).length < data.events.length, '故事图与时间线应是独立模块，不要求逐项配图');
+});
+
+test('playback can reset from any active event to the beginning', () => {
+  const html = readFileSync(join(root, 'demo.html'), 'utf8');
+
+  assert.match(html, /id="resetButton"/);
+  assert.match(html, /aria-label="重置人生足迹播放"/);
+  assert.match(html, /id="routeProgress"/);
+  assert.match(html, /id="progressText"/);
+  assert.match(html, /function resetPlayback\(\)/);
+  assert.match(html, /resetPlayback\(\)\{stop\(\);activate\(0,true,false\)/);
+  assert.match(html, /phase='全部阶段';[^}]*syncMapState\(false\)/);
+  assert.match(html, /map\.setFitView\(markers,false/);
+  assert.match(html, /resetButton\.addEventListener\('click',resetPlayback\)/);
+});
+
+test('ships a reusable core-story prompt and generated story assets', () => {
+  const prompt = readFileSync(join(root, 'story-prompt.md'), 'utf8');
+  assert.match(prompt, /\{\{故事名称\}\}/);
+  assert.match(prompt, /剪纸拼贴/);
+  assert.match(prompt, /4:3/);
+  assert.match(prompt, /不要白色棋盘格背景/);
+
+  for (const filename of [
+    'story-taoyuan.png',
+    'story-qingmei.png',
+    'story-sangu.png',
+    'story-changban.png',
+    'story-yizhou.png',
+    'story-baidi.png',
+  ]) {
+    const image = readFileSync(join(root, filename));
+    assert.deepEqual([...image.subarray(1, 4)], [0x50, 0x4e, 0x47], filename + ' 应为 PNG');
+  }
+});
+
 test('serve refuses to start without a Web JS key', () => {
   const result = run('serve', join(root, 'demo.html'));
   assert.equal(result.status, 1);
