@@ -388,3 +388,48 @@ git status --short
 - 提示词明确要求透明背景并禁止棋盘格、伪汉字、写实照片、3D 和复杂场景；生成完成后仍需人工核对中文文字与透明通道。
 
 验收标准：透明人物像文件存在；`portrait-prompt.md` 可由主 Skill 按需读取；生成 HTML 包含人物像及替代文本；桌面和窄屏下位于右侧时间线顶部且不遮挡关键控件；高德地图、15 个节点和主题切换保持正常。
+
+## 18. 刘备人物像实施计划
+
+**目标：** 将用户提供的刘备人物图处理为透明贴纸，展示在右侧时间线顶部，并为其他历史人物提供独立、可复用的图片生成 Prompt。
+
+**架构：** `SKILL.md` 只负责人物像流程路由，完整模板由同目录 `portrait-prompt.md` 承担；`life-trace.mjs` 继续作为唯一 HTML 生成器，以相对路径引用人物图片。当前 Demo 使用 `liu-bei-portrait.png`，不把图片编码进 HTML。
+
+**技术：** PNG 透明通道、HTML/CSS、Node.js 内置测试、高德 JS API 2.0。
+
+### 任务一：建立人物像与 Prompt 的失败测试
+
+**文件：** 修改 `life-trace/test.mjs`。
+
+- [ ] 断言生成 HTML 包含 `portrait-card`、`liu-bei-portrait.png` 和准确的替代文本。
+- [ ] 断言透明人物像文件存在，且 Prompt 文件包含 `{{人物姓名}}`、`透明背景`、`不要白色棋盘格背景`。
+- [ ] 断言 `SKILL.md` 引用 `portrait-prompt.md`，但不复制完整长提示词。
+- [ ] 运行 `node --test life-trace/test.mjs`，确认新增断言因资源和界面尚未实现而失败。
+
+### 任务二：生成透明人物像与独立 Prompt
+
+**文件：** 新建 `life-trace/liu-bei-portrait.png`、`life-trace/portrait-prompt.md`；修改 `life-trace/SKILL.md`。
+
+- [ ] 以用户图片为输入，只去除固化棋盘格并生成透明背景，保持刘备人物、书法、印章、贴纸描边和 1:1 构图不变。
+- [ ] 检查输出 PNG 具有透明通道，中文主体没有明显变化。
+- [ ] 将用户原提示词压缩为结构化模板，保留人物主体、姓名称号、3—4 个事迹、简介、印章、风格、构图和禁止项。
+- [ ] 在 `SKILL.md` 增加简短人物像流程：读取模板、填充变量、生成并核对文字和透明通道、以 `<person-slug>-portrait.png` 保存。
+- [ ] 运行新增 Prompt 与资源测试，确认通过。
+
+### 任务三：把人物像放入右侧时间线顶部
+
+**文件：** 修改 `life-trace/life-trace.mjs`，重新生成 `life-trace/demo.html`。
+
+- [ ] 在阶段筛选下方、第一张事件卡上方加入人物像卡片，使用 `figure`、`img` 和简短说明。
+- [ ] 桌面端限制图片高度并保持完整比例；窄屏自适应宽度，不产生横向滚动。
+- [ ] 为白色和暗色主题分别配置衬底、边框与阴影，主题切换不重建图片。
+- [ ] 运行 `node life-trace/life-trace.mjs build life-trace/liu-bei.json life-trace/demo.html`，再运行全部测试，确认通过。
+
+### 任务四：完整验证
+
+**文件：** 验证 `life-trace` 目录全部交付物。
+
+- [ ] 在浏览器检查默认白色、暗色、桌面与窄屏布局，确认图片位于右侧时间线顶部且不遮挡地图。
+- [ ] 确认高德地图仍加载 15 个节点，路线、事件卡与主题切换正常。
+- [ ] 运行 Skill 快速校验、数据校验、密钥扫描和 `git diff --check`。
+- [ ] 仅提交人物像、Prompt、Skill 引用、生成器、Demo 与测试相关改动。
